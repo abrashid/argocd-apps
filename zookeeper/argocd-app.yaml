@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: zookeeper-1
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: ../
+  finalizers:
+  - "resources-finalizer.argocd.argoproj.io"
+spec:
+  project: default
+
+  source:
+    path: apps/zookeeper/k8s/dist
+    repoURL: https://github.com/abrashid/argocd-apps
+    targetRevision: HEAD
+
+  destination:
+    namespace: zookeeper
+    server: https://kubernetes.default.svc
+
+  syncPolicy:
+    automated:
+      prune: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 15m
+    syncOptions:
+    - Validate=true
+    - PrunePropagationPolicy=foreground
+    - PruneLast=true
+    - CreateNamespace=true
